@@ -1,6 +1,4 @@
-﻿// Generate a unique Session ID for this user's visit
-// (If you want them to keep their history across days, you could save this ID in localStorage)
-const sessionId = "session_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+﻿const sessionId = "session_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
 
 async function sendMessage() {
     const input = document.getElementById("messageInput");
@@ -15,7 +13,7 @@ async function sendMessage() {
         chatBox.classList.remove('hidden');
     }
 
-    // Display User Message
+    // User MSG
     chatBox.innerHTML += `
         <div class="message-row user-row">
             <div class="bubble">${message}</div>
@@ -31,7 +29,7 @@ async function sendMessage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 message: message,
-                sessionId: sessionId // Send the session ID instead of the whole history array
+                sessionId: sessionId 
             })
         });
 
@@ -42,7 +40,7 @@ async function sendMessage() {
 
         const data = await response.json();
 
-        // Display Bot Message
+        // Bot MSG
         chatBox.innerHTML += `
             <div class="message-row bot-row">
                 <div class="icon">✨</div>

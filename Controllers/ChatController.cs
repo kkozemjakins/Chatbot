@@ -13,7 +13,7 @@ namespace Psychological_Support_Chatbot.Controllers
 {
     public class ChatController : ApiController
     {
-        private static readonly string apiKey = ConfigurationManager.AppSettings["OpenAIApiKey"]; 
+        private static readonly string apiKey = ConfigurationManager.AppSettings["GeminiApiKey"]; 
         private static readonly string geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 
@@ -97,7 +97,7 @@ namespace Psychological_Support_Chatbot.Controllers
             }
         }
 
-        // --- SQLite Database Methods ---
+        // --- SQLite Database ---
 
         private void InitializeDatabase()
         {
