@@ -1,4 +1,8 @@
-﻿async function sendMessage() {
+﻿// Generate a unique Session ID for this user's visit
+// (If you want them to keep their history across days, you could save this ID in localStorage)
+const sessionId = "session_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+
+async function sendMessage() {
     const input = document.getElementById("messageInput");
     const hero = document.getElementById("hero-section");
     const chatBox = document.getElementById("chatBox");
@@ -11,6 +15,7 @@
         chatBox.classList.remove('hidden');
     }
 
+    // Display User Message
     chatBox.innerHTML += `
         <div class="message-row user-row">
             <div class="bubble">${message}</div>
@@ -21,11 +26,13 @@
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        // Change to 'api/chat' (no leading slash) or the full localhost URL
         const response = await fetch("api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: message })
+            body: JSON.stringify({
+                message: message,
+                sessionId: sessionId // Send the session ID instead of the whole history array
+            })
         });
 
         if (!response.ok) {
@@ -35,6 +42,7 @@
 
         const data = await response.json();
 
+        // Display Bot Message
         chatBox.innerHTML += `
             <div class="message-row bot-row">
                 <div class="icon">✨</div>
