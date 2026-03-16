@@ -1,6 +1,8 @@
 ﻿const sessionId = "session_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
 
 async function sendMessage() {
+    sendBtn.disabled = true;
+
     const input = document.getElementById("messageInput");
     const hero = document.getElementById("hero-section");
     const chatBox = document.getElementById("chatBox");
@@ -8,20 +10,42 @@ async function sendMessage() {
 
     if (message.trim() === "") return;
 
-    if (!hero.classList.contains('hidden')) {
-        hero.classList.add('hidden');
+    if (!hero.classList.contains('hidden-smooth')) {
+        hero.classList.add('hidden-smooth');
         chatBox.classList.remove('hidden');
+
+        setTimeout(() => {
+            chatBox.classList.add("show");
+            document.querySelector(".ChatWrapper").classList.add("transition");
+        }, 50);
     }
 
     // User MSG
     chatBox.innerHTML += `
         <div class="message-row user-row">
             <div class="bubble">${message}</div>
-            <div class="icon">👤</div>
+            <div class="icon">
+                <img src='assets/ic-profile-pic.svg' alt='User Icon' class='user-icon'>
+            </div>
         </div>`;
 
     input.value = "";
     chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Typing indicator
+    const typingId = "typing_" + Date.now();
+
+    chatBox.innerHTML += `
+<div id="${typingId}" class="message-row bot-row">
+    <div class="icon">
+        <img src='assets/ic-ai-bot.svg' class='bot-icon'>
+    </div>
+    <div class="bubble typing">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</div>`;
 
     try {
         const response = await fetch("api/chat", {
@@ -41,14 +65,19 @@ async function sendMessage() {
         const data = await response.json();
 
         // Bot MSG
+        const typingBubble = document.getElementById(typingId);
+        typingBubble.remove();
+
         chatBox.innerHTML += `
-            <div class="message-row bot-row">
-                <div class="icon">✨</div>
-                <div class="bubble">
-                    ${data.reply}
-                    <span class="emotion-tag">Emotion detected: ${data.emotion}</span>
-                </div>
-            </div>`;
+        <div class="message-row bot-row">
+            <div class="icon">
+                <img src='assets/ic-ai-bot.svg' class='bot-icon'>
+            </div>
+            <div class="bubble">
+                ${data.reply}
+                <span class="emotion-tag">Emotion detected: ${data.emotion}</span>
+            </div>
+        </div>`;
 
     } catch (e) {
         console.error("Connection Error:", e);
@@ -57,3 +86,15 @@ async function sendMessage() {
 
     chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+
+const inputField = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+
+inputField.addEventListener("input", () => {
+    if (inputField.value.trim() === "") {
+        sendBtn.disabled = true;
+    } else {
+        sendBtn.disabled = false;
+    }
+});
