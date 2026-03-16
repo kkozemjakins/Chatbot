@@ -29,7 +29,7 @@ async function sendMessage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 message: message,
-                sessionId: sessionId 
+                sessionId: sessionId
             })
         });
 
