@@ -27,18 +27,23 @@ namespace Psychological_Support_Chatbot.Controllers
             if (request == null || string.IsNullOrEmpty(request.sessionId))
                 return BadRequest("SessionId is required.");
 
-            // Saves User Message
+
             SaveMessageToDb(request.sessionId, "user", request.message);
 
-            // Processes AI logic
+            //Detect Emotion 
             var emotion = await DetectEmotion(request.message);
-            var history = GetHistoryFromDb(request.sessionId);
-            var reply = await GetAIResponse(history);
 
-            // Saves Bot Message
+
+            var history = GetHistoryFromDb(request.sessionId);
+
+
+            var reply = await GetAIResponse(history, emotion);
+
+            //Save Bot Message
             SaveMessageToDb(request.sessionId, "model", reply);
 
-            return Ok(new { reply = reply, emotion = emotion });
+
+            return Ok(new { reply = reply });
         }
 
         private void SaveMessageToDb(string sessionId, string role, string text)
@@ -79,24 +84,38 @@ namespace Psychological_Support_Chatbot.Controllers
 
 
 
-        private async Task<string> GetAIResponse(List<MessageHistory> history)
+        private async Task<string> GetAIResponse(List<MessageHistory> history, string emotion)
         {
+            // 1. Fetch base prompt from LiteDB
+            string basePrompt = "You are an empathetic psychological support AI. Respond kindly and supportively.";
+            using (var db = new LiteDatabase(dbPath))
+            {
+                var col = db.GetCollection<SystemConfig>("settings");
+                var setting = col.FindOne(x => x.Key == "SystemPrompt");
+                if (setting != null) basePrompt = setting.Value;
+            }
+
+            // 2. Combine base prompt with the detected emotion for context
+            string dynamicSystemInstruction = $"{basePrompt} The user's current emotional tone is: {emotion}. " +
+                                              "Subtly adjust your tone to match or support this emotion without explicitly naming it unless necessary.";
+
+            // 3. Standard Gemini Call
             using (var client = new HttpClient())
             {
-                var contents = history.Select(h => new { role = h.role, parts = h.parts }).ToList();
                 var body = new
                 {
-                    contents = contents.ToArray(),
-                    system_instruction = new { parts = new[] { new { text = "You are an empathetic psychological support AI. Respond kindly and supportively." } } }
+                    contents = history.Select(h => new { role = h.role, parts = h.parts }).ToArray(),
+                    // Injecting the dynamic instruction here
+                    system_instruction = new { parts = new[] { new { text = dynamicSystemInstruction } } }
                 };
 
                 var json = JsonConvert.SerializeObject(body);
-                var response = await client.PostAsync($"{geminiUrl}?key={apiKey}", new StringContent(json, Encoding.UTF8, "application/json"));
-                var result = await response.Content.ReadAsStringAsync();
+                var response = await client.PostAsync($"{geminiUrl}?key={apiKey}",
+                    new StringContent(json, Encoding.UTF8, "application/json"));
 
-                if (!response.IsSuccessStatusCode) return $"AI Error: {response.StatusCode}";
+                if (!response.IsSuccessStatusCode) return "I'm having a bit of trouble connecting right now. Can we try again?";
 
-                dynamic data = JsonConvert.DeserializeObject(result);
+                dynamic data = JsonConvert.DeserializeObject(await response.Content.ReadAsStringAsync());
                 return data.candidates[0].content.parts[0].text.ToString();
             }
         }

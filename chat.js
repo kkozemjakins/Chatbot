@@ -75,7 +75,6 @@ async function sendMessage() {
             </div>
             <div class="bubble">
                 ${data.reply}
-                <span class="emotion-tag">Emotion detected: ${data.emotion}</span>
             </div>
         </div>`;
 
