@@ -5,7 +5,9 @@
     <title>AI Psychological Support Chat</title>
     <link href="https://fonts.googleapis.com/css2?family=Konkhmer+Sleokchher&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Konkhmer Sleokchher', system-ui;
@@ -36,11 +38,12 @@
             display: flex;
             align-items: center;
         }
-        .brand::before {
-            content: "●";
-            margin-right: 5px;
-            font-size: 10px;
-        }
+
+            .brand::before {
+                content: "●";
+                margin-right: 5px;
+                font-size: 10px;
+            }
 
         /* Hero Header */
         #hero-section {
@@ -51,11 +54,12 @@
             overflow: hidden;
             transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), margin-bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out;
         }
-        #hero-section.hidden-smooth {
-            max-height: 0;
-            margin-bottom: 0;
-            opacity: 0;
-        }
+
+            #hero-section.hidden-smooth {
+                max-height: 0;
+                margin-bottom: 0;
+                opacity: 0;
+            }
 
         h1 {
             color: #2c2451;
@@ -63,6 +67,7 @@
             letter-spacing: 2px;
             margin: 0;
         }
+
         p.subtitle {
             color: #2c2451;
             font-size: 12px;
@@ -97,13 +102,30 @@
             transition: opacity 0.6s ease-in-out 0.2s;
             padding: 20px;
         }
-        #chatBox::-webkit-scrollbar { width: 5px; }
-        #chatBox::-webkit-scrollbar-thumb { background: #cbbceb; border-radius: 10px; }
+
+            #chatBox::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            #chatBox::-webkit-scrollbar-thumb {
+                background: #cbbceb;
+                border-radius: 10px;
+            }
 
         /* Bubble Styles */
-        .message-row { display: flex; width: 100%; }
-        .user-row { justify-content: flex-end; }
-        .bot-row { justify-content: flex-start; }
+        .message-row {
+            display: flex;
+            width: 100%;
+        }
+
+        .user-row {
+            justify-content: flex-end;
+        }
+
+        .bot-row {
+            justify-content: flex-start;
+        }
+
         .bubble {
             max-width: 70%;
             padding: 15px 20px;
@@ -137,6 +159,7 @@
             display: flex;
             align-items: center;
         }
+
         #messageInput {
             width: 100%;
             border: none;
@@ -147,11 +170,12 @@
             color: #555;
             resize: none;
         }
-        #messageInput::placeholder {
-            color: #b0b0b0;
-            text-transform: uppercase;
-            font-size: 12px;
-        }
+
+            #messageInput::placeholder {
+                color: #b0b0b0;
+                text-transform: uppercase;
+                font-size: 12px;
+            }
 
         /* Send Button  */
         .send-btn {
@@ -166,66 +190,182 @@
             justify-content: center;
             transition: background 0.3s;
         }
-        .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .send-btn:hover { background: #b5a3e0; }
-        .send-btn svg { fill: white; width: 18px; }
+
+            .send-btn:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+
+            .send-btn:hover {
+                background: #b5a3e0;
+            }
+
+            .send-btn svg {
+                fill: white;
+                width: 18px;
+            }
 
         /* Utility */
-        .hidden { display: none !important; }
+        .hidden {
+            display: none !important;
+        }
 
         /* Typing animation */
-        .typing { display: flex; gap: 5px; }
-        .typing span {
-            width: 6px; height: 6px; background: #888;
-            border-radius: 50%; animation: typing 1.2s infinite;
+        .typing {
+            display: flex;
+            gap: 5px;
         }
-        .typing span:nth-child(2) { animation-delay: 0.2s; }
-        .typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typing { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
 
-        .ChatWrapper.transition { animation: expandChat 0.6s ease forwards; }
-        @keyframes expandChat {
-            0% { transform: scale(0.95); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
+            .typing span {
+                width: 6px;
+                height: 6px;
+                background: #888;
+                border-radius: 50%;
+                animation: typing 1.2s infinite;
+            }
+
+                .typing span:nth-child(2) {
+                    animation-delay: 0.2s;
+                }
+
+                .typing span:nth-child(3) {
+                    animation-delay: 0.4s;
+                }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                opacity: 0;
+            }
+
+            40% {
+                opacity: 1;
+            }
         }
-        #chatBox.show { opacity: 1; }
+
+        .ChatWrapper.transition {
+            animation: expandChat 0.6s ease forwards;
+        }
+
+        @keyframes expandChat {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        #chatBox.show {
+            opacity: 1;
+        }
 
         /* Suggestion Chips */
         .chip-container {
-            display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;
-            transition: opacity 0.4s ease, max-height 0.4s ease; overflow: hidden;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            transition: opacity 0.4s ease, max-height 0.4s ease;
+            overflow: hidden;
         }
+
         .chip {
-            background: rgba(255, 255, 255, 0.6); border: 1px solid #cbbceb;
-            color: #2c2451; padding: 8px 16px; border-radius: 20px;
-            font-size: 12px; cursor: pointer; transition: all 0.3s ease; white-space: nowrap;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid #cbbceb;
+            color: #2c2451;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
         }
-        .chip:hover { background: #cbbceb; transform: translateY(-2px); }
+
+            .chip:hover {
+                background: #cbbceb;
+                transform: translateY(-2px);
+            }
+
         .chip-container.hidden-chips {
-            opacity: 0; max-height: 0; margin-bottom: 0; pointer-events: none;
+            opacity: 0;
+            max-height: 0;
+            margin-bottom: 0;
+            pointer-events: none;
         }
 
         /* --- NEW MODAL STYLES --- */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(5px);
-            display: flex; justify-content: center; align-items: center; z-index: 1000;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
+
         .modal-content {
-            background: white; padding: 40px; border-radius: 20px; text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1); max-width: 400px; width: 90%;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 90%;
         }
-        .modal-content h2 { color: #2c2451; margin-top: 0; }
-        .modal-content p { color: #4a4a6a; font-size: 14px; margin-bottom: 30px; }
-        .modal-buttons { display: flex; gap: 15px; justify-content: center; }
-        .modal-buttons button {
-            padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer;
-            font-family: inherit; font-size: 14px; font-weight: bold; transition: background 0.3s;
+
+            .modal-content h2 {
+                color: #2c2451;
+                margin-top: 0;
+            }
+
+            .modal-content p {
+                color: #4a4a6a;
+                font-size: 14px;
+                margin-bottom: 30px;
+            }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
         }
-        .btn-new { background: #f0f0f5; color: #4a4a6a; }
-        .btn-new:hover { background: #e1e1e8; }
-        .btn-continue { background: #cbbceb; color: white; }
-        .btn-continue:hover { background: #b5a3e0; }
+
+            .modal-buttons button {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                font-family: inherit;
+                font-size: 14px;
+                font-weight: bold;
+                transition: background 0.3s;
+            }
+
+        .btn-new {
+            background: #f0f0f5;
+            color: #4a4a6a;
+        }
+
+            .btn-new:hover {
+                background: #e1e1e8;
+            }
+
+        .btn-continue {
+            background: #cbbceb;
+            color: white;
+        }
+
+            .btn-continue:hover {
+                background: #b5a3e0;
+            }
     </style>
     <script src="chat.js" defer></script>
 </head>

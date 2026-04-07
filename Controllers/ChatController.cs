@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
-using LiteDB; 
+using LiteDB;
 
 namespace Psychological_Support_Chatbot.Controllers
 {
@@ -17,8 +17,26 @@ namespace Psychological_Support_Chatbot.Controllers
         private static readonly string apiKey = ConfigurationManager.AppSettings["GeminiApiKey"];
         private static readonly string geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
-
         private static readonly string dbPath = Path.Combine(System.Web.HttpRuntime.AppDomainAppPath, "App_Data", "chat_history_lite.db");
+
+        // NEW ENDPOINT: Fetch history for the UI
+        [HttpGet]
+        [Route("api/chat/history/{sessionId}")]
+        public IHttpActionResult GetChatHistory(string sessionId)
+        {
+            if (string.IsNullOrEmpty(sessionId)) return BadRequest("SessionId is required.");
+
+            using (var db = new LiteDatabase(dbPath))
+            {
+                var col = db.GetCollection<MessageRecord>("messages");
+                // Fetch all messages for this session, ordered chronologically
+                var history = col.Find(x => x.SessionId == sessionId)
+                                 .OrderBy(x => x.Timestamp)
+                                 .ToList();
+
+                return Ok(history);
+            }
+        }
 
         [HttpPost]
         [Route("api/chat")]
@@ -27,21 +45,17 @@ namespace Psychological_Support_Chatbot.Controllers
             if (request == null || string.IsNullOrEmpty(request.sessionId))
                 return BadRequest("SessionId is required.");
 
-
             SaveMessageToDb(request.sessionId, "user", request.message);
 
             //Detect Emotion 
             var emotion = await DetectEmotion(request.message);
 
-
             var history = GetHistoryFromDb(request.sessionId);
-
 
             var reply = await GetAIResponse(history, emotion);
 
             //Save Bot Message
             SaveMessageToDb(request.sessionId, "model", reply);
-
 
             return Ok(new { reply = reply });
         }
@@ -82,11 +96,8 @@ namespace Psychological_Support_Chatbot.Controllers
             }
         }
 
-
-
         private async Task<string> GetAIResponse(List<MessageHistory> history, string emotion)
         {
-            // 1. Fetch base prompt from LiteDB
             string basePrompt = "You are an empathetic psychological support AI. Respond kindly and supportively.";
             using (var db = new LiteDatabase(dbPath))
             {
@@ -95,17 +106,14 @@ namespace Psychological_Support_Chatbot.Controllers
                 if (setting != null) basePrompt = setting.Value;
             }
 
-            // 2. Combine base prompt with the detected emotion for context
             string dynamicSystemInstruction = $"{basePrompt} The user's current emotional tone is: {emotion}. " +
                                               "Subtly adjust your tone to match or support this emotion without explicitly naming it unless necessary.";
 
-            // 3. Standard Gemini Call
             using (var client = new HttpClient())
             {
                 var body = new
                 {
                     contents = history.Select(h => new { role = h.role, parts = h.parts }).ToArray(),
-                    // Injecting the dynamic instruction here
                     system_instruction = new { parts = new[] { new { text = dynamicSystemInstruction } } }
                 };
 
@@ -133,7 +141,6 @@ namespace Psychological_Support_Chatbot.Controllers
         }
     }
 
-
     public class MessageRecord
     {
         public int Id { get; set; }
@@ -142,6 +149,7 @@ namespace Psychological_Support_Chatbot.Controllers
         public string Text { get; set; }
         public DateTime Timestamp { get; set; }
     }
+
 
 
     public class MessageHistory { public string role { get; set; } public Part[] parts { get; set; } }
